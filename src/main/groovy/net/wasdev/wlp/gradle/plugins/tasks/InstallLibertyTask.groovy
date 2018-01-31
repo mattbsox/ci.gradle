@@ -19,9 +19,15 @@ import javax.xml.parsers.*
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.OutputFile
 import groovy.xml.MarkupBuilder
 
 class InstallLibertyTask extends AbstractTask {
+
+    @OutputFile
+    File getPluginConfigXml() {
+        return new File(project.buildDir, 'liberty-plugin-config.xml')
+    }
 
     @TaskAction
     void install() {

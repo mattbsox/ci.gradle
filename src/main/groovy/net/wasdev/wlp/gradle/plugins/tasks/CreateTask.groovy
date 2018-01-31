@@ -16,9 +16,78 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import net.wasdev.wlp.gradle.plugins.Liberty
+
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
 class CreateTask extends AbstractServerTask {
+
+    String defaultPath = project.projectDir.toString() + '/src/main/liberty/config/'
+
+    CreateTask() {
+        outputs.upToDateWhen {
+            getServerDir(project).exists() && new File(getServerDir(project), 'server.xml')
+        }
+    }
+
+    @InputFile @Optional
+    File getConfigFile() {
+        if(!server.configFile.toString().equals('default') && server.configFile.exists()) {
+            return server.configFile
+        } else if (server.configDirectory != null && new File(server.configDirectory, 'server.xml').exists()) {
+            return new File(server.configDirectory, 'server.xml')
+        } else if (new File(defaultPath + 'server.xml').exists()) {
+            return new File(project.projectDir.toString() + '/src/main/liberty/config/server.xml')
+        }
+    }
+
+    @InputFile @Optional
+    File getBootstrapPropertiesFile() {
+        if (!server.bootstrapPropertiesFile.toString().equals('default') && server.bootstrapPropertiesFile.exists()) {
+            return server.bootstrapPropertiesFile
+        } else if (server.configDirectory != null && new File(server.configDirectory, 'bootstrap.properties').exists()) {
+            return new File(server.configDirectory, 'bootstrap.properties')
+        } else if (new File(defaultPath + 'bootstrap.properties').exists()) {
+            return new File(defaultPath + 'bootstrap.properties')
+        }
+    }
+
+    @InputFile @Optional
+    File getJvmOptionsFile() {
+        if (!server.jvmOptionsFile.toString().equals('default') && server.jvmOptionsFile.exists()) {
+            return server.jvmOptionsFile
+        } else if (server.configDirectory != null && new File(server.configDirectory, 'jvm.options').exists()) {
+            return new File(server.configDirectory, 'jvm.options')
+        } else if (new File(defaultPath + 'jvm.options').exists()) {
+            return new File(defaultPath + 'jvm.options')
+        }
+    }
+
+    @InputFile @Optional
+    File getServerEnvFile() {
+        if (!server.serverEnv.toString().equals('default') && server.serverEnv.exists()) {
+            return server.serverEnv
+        } else if (server.configDirectory != null && new File(server.configDirectory, 'server.env').exists()) {
+            return new File(server.configDirectory, 'server.env')
+        } else if (new File(defaultPath + 'server.env').exists()) {
+            return new File(defaultPath + 'server.env')
+        }
+    }
+
+    @InputDirectory @Optional
+    File getConfigDir() {
+        if(server.configDirectory != null && server.configDirectory.exists()) {
+            return server.configDirectory
+        }
+    }
+
+    @OutputFile
+    File getPluginConfigXml() {
+        return new File(project.buildDir, 'liberty-plugin-config.xml')
+    }
 
     @TaskAction
     void create() {
@@ -26,8 +95,8 @@ class CreateTask extends AbstractServerTask {
         Liberty.checkEtcServerEnvProperties(project)
         if(!getServerDir(project).exists()){
             def params = buildLibertyMap(project);
-            if (project.liberty.server.template != null && project.liberty.server.template.length() != 0) {
-                params.put('template', project.liberty.server.template)
+            if (server.template != null && server.template.length() != 0) {
+                params.put('template', server.template)
             }
             executeServerCommand(project, 'create', params)
         }
