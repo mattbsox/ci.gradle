@@ -89,10 +89,6 @@ class Liberty implements Plugin<Project> {
             description 'Installs Liberty from a repository'
             logging.level = LogLevel.INFO
             group 'Liberty'
-
-            project.afterEvaluate {
-                outputs.upToDateWhen { getInstallDir(project).exists() }
-            }
         }
 
         project.task('libertyRun', type: RunTask) {

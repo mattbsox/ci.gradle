@@ -24,6 +24,12 @@ import groovy.xml.MarkupBuilder
 
 class InstallLibertyTask extends AbstractTask {
 
+    InstallLibertyTask() {
+        outputs.upToDateWhen {
+            getInstallDir(project).exists()
+        }
+    }
+
     @OutputFile
     File getPluginConfigXml() {
         return new File(project.buildDir, 'liberty-plugin-config.xml')
