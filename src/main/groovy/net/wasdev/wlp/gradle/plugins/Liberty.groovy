@@ -228,15 +228,15 @@ class Liberty implements Plugin<Project> {
             }
         }
 
-        if (project.plugins.hasPlugin('ear')) {
-            project.getGradle().getTaskGraph().whenReady {
-                Dependency[] deps = project.configurations.deploy.getAllDependencies().toArray()
-                deps.each { Dependency dep ->
-                    if (dep instanceof ProjectDependency) {
-                        def projectDep = dep.getDependencyProject()
-                        if (projectDep.plugins.hasPlugin('war')) {
-                            setFacetVersion(projectDep, 'jst.web', JST_WEB_FACET_VERSION)
-                        }
+        project.getGradle().getTaskGraph().whenReady {
+            Dependency[] deps = project.configurations.deploy.getAllDependencies().toArray()
+            deps.each { Dependency dep ->
+                if (dep instanceof ProjectDependency) {
+                    def projectDep = dep.getDependencyProject()
+                    if (projectDep.plugins.hasPlugin('war')) {
+                        setFacetVersion(projectDep, 'jst.web', JST_WEB_FACET_VERSION)
+                    } else if (projectDep.plugins.hasPlugin('ear')) {
+                        setFacetVersion(projectDep, 'jst.ear', JST_EAR_FACET_VERSION)
                     }
                 }
             }
