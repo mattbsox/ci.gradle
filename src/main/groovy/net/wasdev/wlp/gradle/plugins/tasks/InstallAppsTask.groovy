@@ -51,8 +51,23 @@ class InstallAppsTask extends AbstractServerTask {
             project.afterEvaluate {
                 springBootVersion = findSpringBootVersion(project)
                 springBootBuildTask = determineSpringBootBuildTask()
+
+                if(project.plugins.hasPlugin('war')) {
+                    inputs.files project.war.outputs.files
+                }
+                if(project.plugins.hasPlugin('ear')) {
+                    inputs.files project.ear.outputs.files
+                }   
             }
         })
+        outputs.upToDateWhen {
+            appsInstalledInDir('apps') || appsInstalledInDir('dropins')
+        }
+    }
+
+    boolean appsInstalledInDir(String appDir) {
+        //Want to check if the directory is empty ignoring the sneaky .DS_Store files on Mac
+        return !(new File(getServerDir(project), appDir).listFiles().toList().findAll {!it.name.equals('.DS_Store')}.isEmpty())
     }
 
     boolean containsTask(List<Task> taskList, String name) {
