@@ -1,4 +1,5 @@
 os: windows
+language: shell
 env:
     - RUNTIME=wlp RUNTIME_VERSION=18.0.0.4
     - RUNTIME=wlp RUNTIME_VERSION=19.0.0.2
@@ -6,7 +7,7 @@ env:
     - RUNTIME=ol RUNTIME_VERSION=19.0.0.2
 before_install:
     - cd ./travis
-    - bash prepare.sh
+    - source prepare.sh
     - bash java.sh
     - bash maven.sh
     - bash installCommon.sh
