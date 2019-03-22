@@ -108,6 +108,7 @@ class InstallLibertyTask extends AbstractTask {
             if (localFile.exists()) {
                 logger.debug 'Getting WebSphere Liberty archive file from the local Gradle repository.'
                 result.put('runtimeUrl', localFile.toURI().toURL())
+                result.put('useWlpCache', 'false')
             }
         } else if (project.liberty.install.runtimeUrl != null) {
             result.put('runtimeUrl', project.liberty.install.runtimeUrl)
