@@ -1,11 +1,27 @@
-sudo: false
+sudo: required
 language: java
+jdk:
+    - oraclejdk8
+    - oraclejdk9
+    - oraclejdk11
+env:
+    - RUNTIME=wlp RUNTIME_VERSION=18.0.0.4
+    - RUNTIME=wlp RUNTIME_VERSION=19.0.0.3
+    - RUNTIME=ol RUNTIME_VERSION=18.0.0.4
+    - RUNTIME=ol RUNTIME_VERSION=19.0.0.3
 matrix:
-  include:
-    - jdk: oraclejdk7
-      env: WLP_VERSION=17.0.0.1
-    - jdk: oraclejdk8
-      env: WLP_VERSION=17.0.0.2
+    exclude:
+    - jdk: oraclejdk11
+      env: RUNTIME=wlp RUNTIME_VERSION=18.0.0.4
+    - jdk: oraclejdk11
+      env: RUNTIME=ol RUNTIME_VERSION=18.0.0.4
+before_install:
+    - echo 'Installing ci.common lib ....'
+    - git clone https://github.com/wasdev/ci.common.git ./ci.common
+    - cd ./ci.common
+    - mvn clean install
+    - cd ..
 script:
-  - travis_wait ./gradlew install check -Prunit=online -DwlpVersion=$WLP_VERSION --stacktrace --info 
-dist: precise
+  - export GRADLE_OPTS="-Dorg.gradle.daemon=true -Dorg.gradle.jvmargs='-XX:MaxPermSize=1024m -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:+HeapDumpOnOutOfMemoryError -Xmx2048m'"
+  - ./gradle-test.sh
+dist: trusty

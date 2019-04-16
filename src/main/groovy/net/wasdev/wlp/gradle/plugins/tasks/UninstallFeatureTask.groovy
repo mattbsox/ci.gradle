@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2015.
+ * (C) Copyright IBM Corporation 2015, 2018.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,34 @@
 package net.wasdev.wlp.gradle.plugins.tasks
 
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.logging.LogLevel
 
 class UninstallFeatureTask extends AbstractServerTask {
 
+    UninstallFeatureTask() {
+        configure({
+            description 'Uninstall a feature from the Liberty server'
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+        })
+    }
+
     @TaskAction
     void uninstallFeature() {
-        def params = buildLibertyMap(project);
-        if (server.uninstallfeatures.name != null) {
-            params.put('name', server.uninstallfeatures.name.join(","))
-        }
-        params.remove('timeout')
+        if (isLibertyInstalled(project)) {
+            def params = buildLibertyMap(project);
+            if (server.uninstallfeatures.name != null) {
+                params.put('name', server.uninstallfeatures.name.join(","))
+            }
+            params.remove('timeout')
 
-        project.ant.taskdef(name: 'uninstallFeature',
-                            classname: 'net.wasdev.wlp.ant.UninstallFeatureTask',
-                            classpath: project.buildscript.configurations.classpath.asPath)
-        project.ant.uninstallFeature(params)
+            project.ant.taskdef(name: 'uninstallFeature',
+                                classname: 'net.wasdev.wlp.ant.UninstallFeatureTask',
+                                classpath: project.buildscript.configurations.classpath.asPath)
+            project.ant.uninstallFeature(params)
+        } else {
+            logger.error ('The runtime has not been installed.')
+        }
     }
 
 }

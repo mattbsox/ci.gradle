@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2017.
+ * (C) Copyright IBM Corporation 2014, 2018.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,83 @@
  */
 package net.wasdev.wlp.gradle.plugins.tasks
 
+import net.wasdev.wlp.gradle.plugins.Liberty
+
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.logging.LogLevel
 
 class CreateTask extends AbstractServerTask {
 
+    final String DEFAULT_PATH = project.projectDir.toString() + '/src/main/liberty/config/'
+
+    CreateTask() {
+        configure({
+            description 'Creates a Liberty server.'
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+        })
+        outputs.upToDateWhen {
+            getServerDir(project).exists() && new File(getServerDir(project), 'server.xml')
+        }
+    }
+
+    @InputDirectory @Optional
+    File getConfigDir() {
+        if(server.configDirectory != null && server.configDirectory.exists()) {
+            return server.configDirectory
+        }
+    }
+
+    @InputFile @Optional
+    File getConfigFile() {
+        return getLibertyPropertyFile(server.configFile, 'server.xml')
+    }
+
+    @InputFile @Optional
+    File getBootstrapPropertiesFile() {
+        return getLibertyPropertyFile(server.bootstrapPropertiesFile, 'bootstrap.properties')
+    }
+
+    @InputFile @Optional
+    File getJvmOptionsFile() {
+        return getLibertyPropertyFile(server.jvmOptionsFile, 'jvm.options')
+    }
+
+    @InputFile @Optional
+    File getServerEnvFile() {
+        return getLibertyPropertyFile(server.serverEnv, 'server.env')
+    }
+
+    @InputFile
+    File getPluginConfigXml() {
+        return new File(project.buildDir, 'liberty-plugin-config.xml')
+    }
+
     @TaskAction
     void create() {
+        //Checking etc/server.env for outputDirs
+        Liberty.checkEtcServerEnvProperties(project)
         if(!getServerDir(project).exists()){
             def params = buildLibertyMap(project);
-            if (project.liberty.server.template != null && project.liberty.server.template.length() != 0) {
-                params.put('template', project.liberty.server.template)
+            if (server.template != null && server.template.length() != 0) {
+                params.put('template', server.template)
             }
             executeServerCommand(project, 'create', params)
         }
-        copyConfigFiles();
+        copyConfigFiles()
+        writeServerPropertiesToXml(project)
     }
 
+    File getLibertyPropertyFile(File libertyPropertyFile, String fileName) {
+        if (!libertyPropertyFile.toString().equals('default') && libertyPropertyFile.exists()) {
+            return libertyPropertyFile
+        } else if (server.configDirectory != null && new File(server.configDirectory, fileName).exists()) {
+            return new File(server.configDirectory, fileName)
+        } else if (new File(DEFAULT_PATH + fileName).exists()) {
+            return new File(DEFAULT_PATH + fileName)
+        }
+    }
 }

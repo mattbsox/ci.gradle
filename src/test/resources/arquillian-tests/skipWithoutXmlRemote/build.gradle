@@ -1,0 +1,28 @@
+import net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian.ConfigureArquillianTask
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+project.buildDir = '../build'
+
+dependencies {
+    compile 'io.openliberty.arquillian:arquillian-liberty-remote:1.0.2'
+}
+
+task configArq (type:ConfigureArquillianTask) {
+    skipIfArquillianXmlExists = true
+    dependsOn 'deleteArquillianXml'
+    doFirst {
+        server = rootProject.liberty.server
+    }
+}

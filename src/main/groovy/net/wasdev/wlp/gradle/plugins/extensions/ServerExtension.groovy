@@ -34,7 +34,7 @@ class ServerExtension{
     File jvmOptionsFile = new File("default")
     File serverEnv = new File("default")
 
-    Map<String, String> bootstrapProperties
+    Map<String, Object> bootstrapProperties
     List<String> jvmOptions
 
     List<Object> apps
@@ -58,6 +58,12 @@ class ServerExtension{
     PackageAndDumpExtension packageLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension dumpLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension javaDumpLiberty = new PackageAndDumpExtension()
+
+    public ServerExtension(String name) {
+        if (name != null) {
+            this.name = name
+        }
+    }
 
     def uninstallfeatures(Closure closure) {
         ConfigureUtil.configure(closure, uninstallfeatures)

@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2017.
+ * (C) Copyright IBM Corporation 2014, 2018.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package net.wasdev.wlp.gradle.plugins.tasks
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.Task
+import org.gradle.api.logging.LogLevel
 import net.wasdev.wlp.ant.ServerTask
 import net.wasdev.wlp.gradle.plugins.utils.*
 import java.io.File
@@ -26,24 +27,32 @@ class StartTask extends AbstractServerTask {
 
     protected final String START_APP_MESSAGE_REGEXP = "CWWKZ0001I.*"
 
+    StartTask() {
+        configure({
+            description 'Starts the Liberty server.'
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+        })
+    }
+
     @TaskAction
     void start() {
 
-        def params = buildLibertyMap(project);
+        params = buildLibertyMap(project);
         params.put('clean', server.clean)
         if (server.timeout != null && server.timeout.length() != 0) {
             params.put('timeout', server.timeout)
         }
         executeServerCommand(project, 'start', params)
 
-        ServerTask serverTask = new ServerTask()
-        serverTask.setInstallDir(params.get('installDir'))
-        serverTask.setServerName(params.get('serverName'))
-        serverTask.setUserDir(params.get('userDir'))
-        serverTask.setOutputDir(getOutputDir(params))
-        serverTask.initTask()
-
         if (server != null && server.verifyAppStartTimeout > 0) {
+            ServerTask serverTask = new ServerTask()
+            serverTask.setInstallDir(params.get('installDir'))
+            serverTask.setServerName(params.get('serverName'))
+            serverTask.setUserDir(params.get('userDir'))
+            serverTask.setOutputDir(getOutputDir(params))
+            serverTask.initTask()
+
             def verifyAppStartTimeout = server.verifyAppStartTimeout
 
             long timeout = verifyAppStartTimeout * 1000

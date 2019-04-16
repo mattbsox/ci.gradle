@@ -16,6 +16,7 @@
 package net.wasdev.wlp.gradle.plugins.extensions
 
 import org.gradle.util.ConfigureUtil
+import org.gradle.api.NamedDomainObjectContainer
 
 class LibertyExtension {
 
@@ -34,7 +35,7 @@ class LibertyExtension {
     File jvmOptionsFile = new File("default")
     File serverEnv = new File("default")
 
-    Map<String, String> bootstrapProperties
+    Map<String, Object> bootstrapProperties
     List<String> jvmOptions
 
     boolean clean = false
@@ -43,12 +44,16 @@ class LibertyExtension {
 
     int verifyAppStartTimeout = 0
 
+    String jspVersion
+    int jspCompileTimeout = 40
+
     def numberOfClosures = 0
 
     FeatureExtension features = new FeatureExtension()
     UninstallFeatureExtension uninstallfeatures = new UninstallFeatureExtension()
     InstallExtension install = new InstallExtension()
     CleanExtension cleanDir = new CleanExtension()
+    SpringBootExtension thin = new SpringBootExtension()
 
     DeployExtension deploy = new DeployExtension()
     UndeployExtension undeploy = new UndeployExtension()
@@ -57,6 +62,7 @@ class LibertyExtension {
     PackageAndDumpExtension dumpLiberty = new PackageAndDumpExtension()
     PackageAndDumpExtension javaDumpLiberty = new PackageAndDumpExtension()
 
+    NamedDomainObjectContainer<ServerExtension> servers
 
     ServerExtension server
 
@@ -101,10 +107,17 @@ class LibertyExtension {
         ConfigureUtil.configure(closure, cleanDir)
     }
 
+    def thin(Closure closure) {
+       ConfigureUtil.configure(closure, thin)
+    }
+
     def server(Closure closure){
         server = new ServerExtension()
         ConfigureUtil.configure(closure, server)
+    }
 
+    def servers(Closure configurationClosure){
+        servers.configure(configurationClosure)
     }
 
 }
