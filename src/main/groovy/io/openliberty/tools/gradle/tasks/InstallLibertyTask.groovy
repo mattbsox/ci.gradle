@@ -19,7 +19,7 @@ import javax.xml.parsers.*
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.logging.LogLevel
@@ -29,6 +29,7 @@ import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.file.FileCollection
 import groovy.xml.MarkupBuilder
 
 import java.util.Map.Entry
@@ -54,10 +55,12 @@ class InstallLibertyTask extends AbstractTask {
         }
     }
 
-    @Input
+    @InputFiles
     @Optional
-    Configuration getLibertyRuntimeConfiguration() {
-        return project.configurations.libertyRuntime
+    FileCollection getLibertyRuntimeConfiguration() {
+        return project.configurations.libertyRuntime.fileCollection( { Dependency dep ->
+            dep.getGroup().equals('io.openliberty') || dep.getGroup().equals('com.ibm.websphere.appserver.runtime')
+        })
     }
 
     @TaskAction
