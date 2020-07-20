@@ -23,6 +23,10 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.Task
 import org.gradle.api.tasks.Internal
 
+import io.openliberty.tools.ant.jsp.CompileJSPs
+import io.openliberty.tools.ant.install.InstallLibertyTask
+import io.openliberty.tools.ant.ServerTask
+
 abstract class AbstractTask extends DefaultTask {
 
     //params that get built with installLiberty
@@ -30,6 +34,11 @@ abstract class AbstractTask extends DefaultTask {
     protected boolean isWindows = System.properties['os.name'].toLowerCase().indexOf("windows") >= 0
     protected String springBootVersion
     protected Task springBootTask
+
+    //Used to get classes on classpath during plugin inspection by Gradle
+    protected CompileJSPs compileJSP
+    protected InstallLibertyTask installTask
+    protected ServerTask serverTask
 
     protected getInstallDir = { Project project ->
         if (project.liberty.installDir == null) {
