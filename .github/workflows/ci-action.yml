@@ -1,0 +1,38 @@
+name: CI_TESTS
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        java: [ 8, 11 ]
+        RUNTIME: [ ol, wlp ]
+        RUNTIME_VERSION: [ 19.0.0.9, 20.0.0.1 ]
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.RUNTIME }}-${{ matrix.RUNTIME_VERSION }} with Java ${{ matrix.java }} on ${{ matrix.os }}
+    steps:
+    - name: Setup java
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }} 
+    - name: Clone ci.gradle
+      uses: actions/checkout@v2
+    - name: Clone ci.common
+      uses: actions/checkout@v2
+      with:
+        repository: OpenLiberty/ci.common
+        path: ci.common 
+    - name: Install ci.common
+      run: |
+        cd ./ci.common
+        mvn clean install -DskipTests -DskipITs
+        cd ..
+    - name: Run Gradle Tests
+      run: |
+        ./gradlew clean install check -P"test.exclude"="**/*15*" -Druntime="${{matrix.RUNTIME}}" -DruntimeVersion="${{matrix.RUNTIME_VERSION}}" --stacktrace --info --no-daemon
