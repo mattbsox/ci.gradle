@@ -1,0 +1,26 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath ("io.openliberty.tools:liberty-ant-tasks:${antVersion}")
+        classpath ("io.openliberty.tools:ci.common:${commonVersion}")
+    }
+}
+
+plugins {
+    id "io.openliberty.tools.gradle.Liberty" version "3.2-SNAPSHOT"
+    id 'war'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    providedCompile group: 'javax', name: 'javaee-api', version: '8.0.1'
+
+    libertyRuntime group: 'io.openliberty', name: 'openliberty-runtime', version: '[20.0.0.2,)'
+}

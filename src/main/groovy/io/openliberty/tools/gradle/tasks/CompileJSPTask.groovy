@@ -57,7 +57,7 @@ class CompileJSPTask extends AbstractFeatureTask {
     }
 
     protected void perTaskCompileJSP(Task task) throws Exception {
-        compileJsp = new CompileJSPs()
+        CompileJSPs compileJsp = new CompileJSPs()
         compileJsp.setInstallDir(getInstallDir(project))
         compileJsp.setTempdir(project.buildDir)
         compileJsp.setDestdir(new File(project.buildDir.getAbsolutePath()+"/classes/java"))
